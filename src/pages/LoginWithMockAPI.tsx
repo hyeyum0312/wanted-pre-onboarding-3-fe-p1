@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 
 type LoginSuccessMessage = 'SUCCESS'
 type LoginFailMessage = 'FAIL'
@@ -8,23 +8,69 @@ interface LoginResponse {
   token: string
 }
 
+interface UserInfo {
+  name: string
+}
+interface User {
+  username: string,
+  password: string,
+  userInfo: UserInfo
+}
+const users: User[] = [
+  {
+    username: 'blue',
+    password: '1234',
+    userInfo: { name: 'blueStragglr'},
+  },
+  {
+    username: 'white',
+    password: '1234',
+    userInfo: { name: 'whiteDwarf'},
+  },
+  {
+    username: 'red',
+    password: '1234',
+    userInfo: { name: 'redGiant'},
+  },
+]
+const _secret: string = '1234qwer!@#$'
 const login = async (username: string, password: string): Promise<LoginResponse | null> => {
   // TODO: 올바른 username, password를 입력하면 {message: 'SUCCESS', token: (원하는 문자열)} 를 반환하세요.
-  return null
+  const user: User | undefined = users.find((user: User) => {
+    return user.username === username && user.password === password
+  });
+  return user
+    ? { message: 'SUCCESS', token: JSON.stringify({user: user.userInfo, secret: _secret})}
+    : null
 }
 
-const getUserInfo = async (): Promise<{ username: string } | null> => {
+const getUserInfo = async (token:string): Promise<UserInfo | null> => {
   // TODO: login 함수에서 받은 token을 이용해 사용자 정보를 받아오세요.
-  return null
+  const parsedToken = JSON.parse(token)
+  if (!parsedToken?.scret || parsedToken.secret !== _secret) return null
+
+  const loggedUser: User | undefined = users.find((user:User) => {
+    if (user.userInfo.name === parsedToken.user.name) return user
+  })
+  return loggedUser ? loggedUser.userInfo : null
 }
 
 const LoginWithMockAPI = () => {
+  const [userInfo, setUserInfo] = useState<UserInfo>({name: ''});
   const loginSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // TODO: form 에서 username과 password를 받아 login 함수를 호출하세요.
     const formData = new FormData(event.currentTarget);
-    for (let [key, value] of formData.entries()) console.log(key, value);
+
+    const loginRes = await login(formData.get('username') as string, formData.get('password') as string)
+    if (!loginRes) return
+
+    const userInfo = await getUserInfo(loginRes.token)
+    if(!userInfo) return
+
+    setUserInfo(userInfo);
+    // for (let [key, value] of formData.entries()) console.log(key, value);
   }
 
   return (<div>
