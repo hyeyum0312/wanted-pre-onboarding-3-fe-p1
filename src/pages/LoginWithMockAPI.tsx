@@ -34,6 +34,7 @@ const users: User[] = [
   },
 ]
 const _secret: string = '1234qwer!@#$'
+
 const login = async (username: string, password: string): Promise<LoginResponse | null> => {
   // TODO: 올바른 username, password를 입력하면 {message: 'SUCCESS', token: (원하는 문자열)} 를 반환하세요.
   const user: User | undefined = users.find((user: User) => {
@@ -62,11 +63,13 @@ const LoginWithMockAPI = () => {
 
     // TODO: form 에서 username과 password를 받아 login 함수를 호출하세요.
     const formData = new FormData(event.currentTarget);
-
+    console.log('formData',formData)
     const loginRes = await login(formData.get('username') as string, formData.get('password') as string)
+    console.log('loginRes',loginRes)
     if (!loginRes) return
 
     const userInfo = await getUserInfo(loginRes.token)
+    console.log('userInfo',userInfo);
     if(!userInfo) return
 
     setUserInfo(userInfo);
@@ -86,7 +89,7 @@ const LoginWithMockAPI = () => {
         Password:
         <input type="password" name="password" />
       </label>
-      <input type="submit" value="Submit" />
+      <button type="submit" value="Submit">Submit</button>
       {/* TODO: 여기에 username과 password를 입력하는 input을 추가하세요. 제출을 위해 button도 추가하세요. */}
     </form>
     <div>
@@ -94,7 +97,7 @@ const LoginWithMockAPI = () => {
         User info
       </h2>
       {/* TODO: 유저 정보를 보여주도록 구현하세요. 필요에 따라 state나 다른 변수를 추가하세요. */}
-      {JSON.stringify({username: 'blueStragglr'})}
+      {JSON.stringify(userInfo)}
     </div>
   </div>)
 }
